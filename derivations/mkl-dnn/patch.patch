@@ -1,0 +1,19 @@
+Index: mkl-dnn-7de7e5d/src/cpu/jit_uni_reorder_utils.cpp
+===================================================================
+@@ -266,6 +266,8 @@
+ }
+ 
+ void prb_normalize(prb_t &p) {
++#pragma GCC diagnostic push
++#pragma GCC diagnostic ignored "-Warray-bounds"
+     for (int d = 0; d < p.ndims; ++d) {
+         int min_pos = d;
+         for (int j = d + 1; j < p.ndims; ++j) {
+@@ -279,6 +281,7 @@
+         if (min_pos != d)
+             nstl::swap(p.nodes[d], p.nodes[min_pos]);
+     }
++#pragma GCC diagnostic pop
+ }
+ 
+ void prb_simplify(prb_t &p) {

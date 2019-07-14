@@ -1,0 +1,14 @@
+Index: arrayfire-full-3.6.2/CMakeModules/FindMKL.cmake
+===================================================================
+@@ -65,3 +65,3 @@
+ set(MKL_THREAD_LAYER "TBB" CACHE STRING "The thread layer to choose for MKL")
+-set_property(CACHE MKL_THREAD_LAYER PROPERTY STRINGS "TBB" "GNU OpenMP" "Intel OpenMP" "Sequential")
++set_property(CACHE MKL_THREAD_LAYER PROPERTY STRINGS "TBB" "GNU OpenMP" "IntelOpenMP" "Sequential")
+ 
+@@ -214,4 +214,5 @@
+ # MKL can link against Intel OpenMP, GNU OpenMP, TBB, and Sequential
+-if(MKL_THREAD_LAYER STREQUAL "Intel OpenMP")
++if(MKL_THREAD_LAYER STREQUAL "IntelOpenMP")
+   find_mkl_library(NAME ThreadLayer LIBRARY_NAME mkl_intel_thread)
+   find_mkl_library(NAME ThreadingLibrary LIBRARY_NAME iomp5)
++  message(INFO "Using Intel OpenMP ${MKL_ThreadLayer_LINK_LIBRARY}")
