@@ -29,6 +29,9 @@ with pkgs; mkShell
         clang
         binutils
 
+        libfvad
+        pulseaudio
+
         arrayfire
         mkl
         flac
@@ -43,6 +46,8 @@ with pkgs; mkShell
         mkl
         mkl-dnn
         wav2letter
+        zlib
+        bzip2
     ];
   }
 

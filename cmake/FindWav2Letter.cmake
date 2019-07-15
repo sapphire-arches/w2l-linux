@@ -1,0 +1,40 @@
+message(STATUS "Looking for WAV2LETTER")
+
+find_library(WAV2LETTER_LIB
+  w2l
+  ENV WAV2LETTER_ROOT_DIR
+  PATHS
+    $ENV{WAV2LETTER_ROOT_DIR}
+  HINT
+    ${WAV2LETTER_DIR}
+    ${WAV2LETTER_LIB_DIR}
+    $ENV{KENLM_ROOT_DIR}/lib
+)
+
+find_file(WAV2LETTER_HEADER
+  w2l.h
+  ENV WAV2LETTER_INC
+  HINT
+    ${WAV2LETTER_DIR}
+    ${WAV2LETTER_DIR}/wav2letter
+    $ENV{WAV2LETTER_INC}
+    ${WAV2LETTER_LIB}
+  )
+
+if (WAV2LETTER_HEADER)
+  message(STATUS "wav2letter header found in ${WAV2LETTER_HEADER}")
+else()
+  message(FATAL_ERROR "wav2letter header not found; please set CMAKE_INCLUDE_PATH or WAV2LETTER_INC")
+endif()
+
+get_filename_component(WAV2LETTER_INCLUDE_DIR ${WAV2LETTER_HEADER} DIRECTORY)
+set(WAV2LETTER_LIBRARIES ${WAV2LETTER_LIB})
+set(WAV2LETTER_INCLUDE_DIRS ${WAV2LETTER_INCLUDE_DIR})
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(wav2letter DEFAULT_MSG WAV2LETTER_INCLUDE_DIRS WAV2LETTER_LIBRARIES)
+
+if (wav2letter_FOUND)
+  message(STATUS "Found wav2letter (include: ${WAV2LETTER_INCLUDE_DIRS}, libraries: ${WAV2LETTER_LIBRARIES})")
+  mark_as_advanced(WAV2LETTER_ROOT_DIR WAV2LETTER_INCLUDE_DIRS WAV2LETTER_LIBRARIES)
+endif()
