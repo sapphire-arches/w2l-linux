@@ -1,5 +1,5 @@
 { stdenv
-, fetchgit
+, fetchFromGitHub
 , autoreconfHook
 , cmake
 , curl
@@ -9,21 +9,24 @@
 
 stdenv.mkDerivation {
   name = "mkl-dnn";
-  src = fetchgit {
-    url = "https://github.com/intel/mkl-dnn.git";
-    rev = "7de7e5d02bf687f971e7668963649728356e0c20";
-    sha256 = "0j4za82k88s2k8wyh6aradh5i7196fj0xkcn8yagym5nbvdpd50c";
+
+  src = fetchFromGitHub {
+    owner = "intel";
+    repo = "mkl-dnn";
+    rev = "4bdffc2cb1c3d47df9604d35d2c7e5e47a13f1a6";
+    sha256 = "03dycq2x4ihfsps4flw570hdhmkr9p49s9rzsdzwhz0l6d6qvcrw";
   };
+
   enableParallelBuilding = true;
 
-  buildInputs = [ cmake blas ];
+  nativeBuildInputs = [ cmake blas ];
 
-  cmakeFlags =
-    [ "-DWITH_TEST=OFF"
-      "-WITH_EXAMPLE=OFF"
-    ];
+  NIX_CFLAGS_COMPILE = [ "-Wno-error=stringop-truncation" ];
 
-  patches = [ ./patch.patch ];
+  cmakeFlags = [
+    "-DWITH_TEST=OFF"
+    "-WITH_EXAMPLE=OFF"
+  ];
 
   meta = with stdenv.lib; {
     description = "An open-source performance library for deep-learning applications";
