@@ -1,7 +1,7 @@
 { stdenv
-, fetchgit
+, fetchFromGitHub
 , arrayfire
-, cereal-develop
+, cereal
 , cmake
 , gloo
 , mkl-dnn
@@ -9,34 +9,30 @@
 , blas
 }:
 
-let
-  revision = "6ec9dc7e9f57400801794b2e2f02317031883268";
-in
-
 stdenv.mkDerivation {
   name = "flashlight";
 
-  src = fetchgit {
-    url = "https://github.com/facebookresearch/flashlight.git";
-    rev = revision;
-    sha256 = "1afhyjfwf583j3q27arjmv4783hiqhjabqqjvni7clv1gccqc4m3";
+  src = fetchFromGitHub {
+    owner = "facebookresearch";
+    repo = "flashlight";
+    rev = "716d1b0913be1c26e446ed37450a5081c371a749";
+    sha256 = "1lglk1j4bk0i1ax4nhvaddf9724739im9wcab0rlymc3nyj7k003";
   };
 
   enableParallelBuilding = true;
 
-  nativeBuildInputs = [ arrayfire ];
-  buildInputs = [ cmake blas gloo mpich ];
+  nativeBuildInputs = [ cmake ];
+  buildInputs = [ arrayfire blas gloo mpich cereal ];
 
-  cmakeFlags =
-    [ "-DCEREAL_INCLUDE_DIR=${cereal-develop}/include"
-      "-DMKLDNN_ROOT=${mkl-dnn}"
+  NIX_CFLAGS_COMPILE = [ "-I${cereal}/include/cereal" ];
 
-      "-DFLASHLIGHT_BACKEND=CPU"
-      "-DFL_BUILD_TESTS=OFF"
-      "-DFL_BUILD_EXAMPLES=OFF"
-    ];
+  cmakeFlags = [
+    "-DMKLDNN_ROOT=${mkl-dnn}"
 
-  patches = [ ./remove-cereal-external.patch ];
+    "-DFLASHLIGHT_BACKEND=CPU"
+    "-DFL_BUILD_TESTS=OFF"
+    "-DFL_BUILD_EXAMPLES=OFF"
+  ];
 
   meta = with stdenv.lib; {
     description = "A fast, flexible machine learning library written entirely in C++";

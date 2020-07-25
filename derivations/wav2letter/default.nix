@@ -1,5 +1,5 @@
 { stdenv
-, fetchgit
+, fetchFromGitHub
 , cmake
 , pkgconfig
 , arrayfire
@@ -14,70 +14,70 @@
 , libsndfile
 , libvorbis
 , lzma
-, mkl
-, mkl-dnn
+, mkl, mkl-dnn
 , zlib
+, fftw
 }:
-
-let
-  revision = "0f64f52975500b1c81dfb4147670d9e466e42759";
-in
 
 stdenv.mkDerivation rec {
   name = "wav2letter";
-  src = fetchgit {
-    url = "https://github.com/bobtwinkles/wav2letter.git";
-    rev = revision;
-    sha256 = "1ccdrw3dga86amm2m25nj10dla95vv6smfgf4jvwfx06jl04d1h2";
+
+  src = fetchFromGitHub {
+    owner = "Mic92";
+    repo = "wav2letter";
+    rev = "1db2513841e9d7727aeddb6863b22f4c230eb9f1";
+    sha256 = "0vq9jcdnqjaxhjr63xsdff82xn8f7wb402g1zzkfxg622zj5gq13";
   };
 
-  nativeBuildInputs = [ kenlm.src lzma.dev ];
+  nativeBuildInputs = [
+    cmake
+    pkgconfig
+  ];
 
-  buildInputs =
-    [ cmake
-      pkgconfig
+  buildInputs = [
+    lzma
 
-      arrayfire
-      blas
-      bzip2
-      flac
-      flashlight
-      glog
-      google-gflags
-      kenlm
-      libogg
-      libsndfile
-      libvorbis
-      mkl
-      mkl-dnn
-      zlib
-    ];
+    fftw
+    arrayfire
+    blas
+    bzip2
+    flac
+    flashlight
+    glog
+    google-gflags
+    kenlm
+    libogg
+    libsndfile
+    libvorbis
+    mkl
+    mkl-dnn
+    zlib
+  ];
 
-  cmakeFlags =
-    [ "-DW2L_BUILD_TESTS=NO"
-      "-DW2L_LIBRARIES_USE_CUDA=OFF"
-      "-DW2L_CRITERION_BACKEND=CPU"
-      "-DKENLM_MODEL_HEADER=${kenlm.src}/lm/model.hh"
-      "-DFFTW_INCLUDES=${mkl}/include/fftw"
-      "-DFFTW_LIB=${mkl}/lib/libmkl_intel_lp64.so"
-      "-DFFTWF_LIB=${mkl}/lib/libmkl_intel_lp64.so"
-      "-DFFTWL_LIB=${mkl}/lib/libmkl_intel_lp64.so"
-    ];
+  NIX_CFLAGS_COMPILE = [ "-I${mkl}/include/fftw" ];
 
-  buildPhase = '' make w2l libwav2letter++.a '';
+  cmakeFlags = [
+    "-DDW2L_BUILD_LIBRARIES_ONLY=on"
+    "-DW2L_BUILD_TESTS=NO"
+    "-DW2L_LIBRARIES_USE_CUDA=OFF"
+    "-DW2L_CRITERION_BACKEND=CPU"
+    "-DKENLM_MODEL_HEADER=${kenlm}/include/lm/model.hh"
+    "-DFFTW_LIB=${mkl}/lib/libmkl_intel_lp64.so"
+    "-DFFTWF_LIB=${mkl}/lib/libmkl_intel_lp64.so"
+    "-DFFTWL_LIB=${mkl}/lib/libmkl_intel_lp64.so"
+  ];
 
-  # installPhase = ''
-  #   mkdir -p $out/bin
-  #   mkdir -p $out/lib
-  #   mkdir -p $out/include
-  #   install libwav2letter++.a $out/lib
-  #   install libw2l.a $out/lib
-  #   install ${src}/w2l.h $out/include
-  # '';
+  buildFlags = [ "w2l" "libwav2letter++.a" ];
+
+  installPhase = ''
+    install -D --target $out/lib libwav2letter++.a libw2l.so
+    ln -s $out/lib/libw2l.so{,.1}
+    install -D --target $out/include ../w2l.h
+  '';
 
   meta = with stdenv.lib; {
     description = "A fast open source speech processing toolkit from the Speech Team at Facebook AI Research";
-    license = license.bsd3;
+    license = licenses.bsd3;
     homepage = "https://github.com/facebookresearch/wav2letter";
   };
 }
